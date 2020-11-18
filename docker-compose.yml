@@ -1,0 +1,65 @@
+version: '3'
+
+services:
+  test:
+    image: "node:12-alpine"
+    build: .
+    depends_on:
+      - 'postgres'
+    links:
+      - postgres
+    networks:
+      - app-network
+    volumes:
+      - ${MY_WORKSPACE}:/ws
+    working_dir: /ws${WORKSPACE_PATH:-/}
+    user: ${MY_USER:-root}
+
+    environment:
+      NEXUS_USERNAME: ${NEXUS_USERNAME}
+      NEXUS_PASSWORD: ${NEXUS_PASSWORD}
+      NEXUS_URL: ${NEXUS_URL}/repository/maven2-hosted
+      db_postgres_db_host: postgres
+      db_postgres_db_name: gateway_credit_card
+      db_postgres_db_user: postgres
+      db_postgres_db_password: postgres
+      CLIENT_TDC_MX_URL: https://localhost/
+      CLIENT_TDC_CO_URL: https://localhost/
+      CLIENT_TDC_PE_URL: https://localhost/
+      CLIENT_TDC_TRANSACTIONS_FEE: transactionsFee
+      CLIENT_TDC_TRANSACTIONS: transactions
+      CLIENT_BASICS_URL: https://localhost/card/basics/api/
+      CLIENT_BASICS_MOVEMENTS: /card/basics/api/PE/v2/movements
+      KEYCLOAK_URL: https://localhost/kc 
+      KEYCLOAK_GRANT_TYPE: 'password'
+      KEYCLOAK_CLIENT_ID: 'rpp-card-basics'
+      KEYCLOAK_USERNAME: 'rpp-card-basics-rpp-gateway'
+      KEYCLOAK_PASSWORD: 'HewMzsMOHOeiuZbcKD4dQAVFYr7VftSX'
+      KEYCLOAK_SECRET: 'MIIClzCCAX8CBgFsK/Z5eDANBgkqhkiG9w0BAQsFADAPMQ0wCwYDVQQDDARwcm9kMB4XDTE5MDcyNjAxNDYwOFoXDTI5MDcyNjAxNDc0OFowDzENMAsGA1UEAwwEcHJvZDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKRG1qbsivjtZ/x3mzvENd+BUQMbHbqjWV+/qGPCMQnYwqS4MdeMTtAWMzDtcfBS7B2CjxEICaXGIi3M4pxtQs522UNcyPUKF89THdhHnfhCWchhwv6IoVwbe/ibhCpAOAf6MJ+6jAeLJsZkTfr0gXs574pGq9BnRWpoVv9RnyWINeW2m3jdxfc5G9vGweObHL23r6fVsdVCjdESvb4JgClsbyhD813MVaYRHUjwkh6xVkvCZZH0khQWPjZQXBTgP/RwlYPK//cD3ldAVXnECz3HgodCoC/CvJlWnAgXxixRPQyVo+nifw4pDOw83z2uvczXW0MnYg3Kx8QI7e9fjq8CAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAg39zvYdVEXBhuyLWdazocbpDL5y9YNtvO8fvlJILbBEL0CMOF9E7WzuXHZNksNjUBIuyP7rQ+vCrbxZJJOjYcbjSmmPtMi2AJ9q+RFn1ntiNLcQ6OMjanIhSbZYXIp57Whj0kVJ6TlsjhCNFUtpAg20cLEfvD0FS3eiLTgpmIc+fXC/ODKIVJLHM0Zr/lcMbaCAJub0z/uMYxAJAtxmcCR3oNZFuHr8+LBD5GGACqA49SZo82AuIiPBwVyH9'
+      CLIENT_FRAUD_CO_URL: https://localhost
+      CLIENT_FRAUD_PE_URL: https://localhost
+      CLIENT_FRAUD_MX_URL: https://localhost
+      KEYCLOAK_CLIENT_ID_FRAUD: 'rpp-fraud'
+      KEYCLOAK_USERNAME_FRAUD: 'rpp-fraud-rpp-gateway'
+      KEYCLOAK_PASSWORD_FRAUD: 'yFZjrxkM2nprC8VaN9QmlqfPVSo72N4Q'
+    command: >
+      sh -c "
+        npm install &&
+        npm run lint &&
+        npm run build &&
+        npm run typeorm migration:run &&
+        npm run test
+      "
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_DB: gateway_credit_card
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
