@@ -16,7 +16,6 @@ pipeline {
                 flow.init()
 
                 flow.wstage("Test", {
-                  sh 'sh create-npmrc.sh --ci'
                   sh 'docker-compose run --rm test'
                 })
 
