@@ -3,16 +3,16 @@ import * as Joi from '@hapi/joi';
 import { Injectable } from '@nestjs/common';
 dotenv.config();
 
-export type EnvConfig = Record<string, string>;
+const ENV_VARS = { NODE_ENV: '', PORT: '', AWS_ACCOUNT_ID: '', AWS_QUEUE_NAME: '', AWS_REGION: '' };
+type EnvConfig = typeof ENV_VARS;
 
 @Injectable()
 export class ConfigService {
-  private readonly EnvVarsNames = ['NODE_ENV', 'PORT'];
   private readonly envConfig: EnvConfig;
 
   constructor() {
-    const envVars: { [key: string]: string } = {};
-    this.EnvVarsNames.forEach((name) => (envVars[name] = this.getEnvVar(name)));
+    const envVars = ENV_VARS;
+    Object.keys(ENV_VARS).forEach((name) => (envVars[name] = this.getEnvVar(name)));
     this.envConfig = this.validateInput(envVars);
   }
 
