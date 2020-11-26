@@ -19,7 +19,7 @@ export class Logger extends NestLogger implements LoggerService {
     this.logger.info(util.format(message));
   }
   error(message: any, meta?: any) {
-    this.logger.error(util.format(message, meta));
+    this.logger.error(util.format(message, meta ?? ''));
   }
   warn(message: string) {
     this.logger.warning(util.format(message));
